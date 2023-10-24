@@ -57,6 +57,42 @@ class Stock {
         }
     }
 
+    calulateGst = async (unit) => {
+        try {
+            if (!this.product.isGst) return 0
+            else {
+                let total = Number(unit) * Number(this.product.price)
+                let gstAmount = Math.round((total / 100) * Number(this.product.gst));
+                return gstAmount
+            }
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
+
+    productCost = async (unit) => {
+        try {
+            let totalWithOutGst = (this.product.price * unit).toFixed(2)
+            let gst = await this.calulateGst(unit)
+            let totalWithGst = Number(totalWithOutGst) + Number(gst)
+            return ({
+                code: this.product.code,
+                name: this.product.name,
+                serialId: this.product.serialId,
+                description: this.product.description,
+                isAvailable: true,
+                quantity: unit,
+                unitPrice: this.product.price.toFixed(2),
+                totalWithOutGst: totalWithOutGst,
+                gst: gst,
+                totalWithGst: totalWithGst.toFixed(2)
+            })
+        } catch (error) {
+            console.log(error)
+            throw error
+        }
+    }
 
 }
 

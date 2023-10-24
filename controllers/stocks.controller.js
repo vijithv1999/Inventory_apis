@@ -273,8 +273,12 @@ async function checkAvailability(req, res) {
     let { id, quantity } = req.body
     let stock = new Stock(id)
     await stock.Init()
-    if (await stock.checkAvailabilty(quantity)) return handleResponse({ res, code: 200, error: false, message: "Stock available.", data: { status: true } })
-    else return handleResponse({ res, code: 200, error: false, message: "Not avialble.", data: { status: false } })
+    if (await stock.checkAvailabilty(quantity)) {
+      let gstAmount = await stock.calulateGst(quantity)
+      return handleResponse({ res, code: 200, error: false, message: "Stock available.", data: { status: true, gstAmount: gstAmount } })
+
+    }
+    else return handleResponse({ res, code: 200, error: false, message: "Not avialble.", data: { status: false, gstAmount: 0 } })
   } catch (error) {
     console.error(error);
     return handleResponse({
@@ -325,6 +329,20 @@ async function getprodutCode(req, res) {
 }
 
 
+let getprodutCost = async (req, res) => {
+  try {
+    let { code, unit } = req.body
+    let stock = new Stock(code)
+    await stock.Init()
+    let cost = await stock.productCost(unit)
+    console.log(cost)
+    return handleResponse({ res, code: 200, error: false, message: 'code', data: cost });
+
+  } catch (error) {
+    console.error(error);
+    return handleResponse({ res, code: 500, error: true, message: 'Internal server error', data: null });
+  }
+}
 
 
 
@@ -344,4 +362,4 @@ async function generateUniqueId() {
 
 
 
-export { addStocks, ListStocks, getStockWithQuery, saveInvoice, getIncompleteInvoices, getInvoicesByID, MakeAnTransaction, checkAvailability, getDateWiseReport, getprodutCode }
+export { addStocks, ListStocks, getStockWithQuery, saveInvoice, getIncompleteInvoices, getInvoicesByID, MakeAnTransaction, checkAvailability, getDateWiseReport, getprodutCode, getprodutCost }
